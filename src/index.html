@@ -50,7 +50,7 @@
             <button id="add-pages-btn" class="icon-button" title="Add or merge PDFs" aria-label="Add or merge PDFs">＋</button>
           </div>
           <div id="document-name" class="document-name">No document open</div>
-          <div id="thumbnail-list" class="thumbnail-list">
+          <div id="thumbnail-list" class="thumbnail-list" tabindex="-1">
             <div class="empty-pages">
               <span class="empty-icon" aria-hidden="true">▧</span>
               <span>Open a PDF to see its pages</span>
@@ -147,6 +147,7 @@
 
           <section class="inspector-section object-inspector" id="object-inspector">
             <h3>Selected object</h3>
+            <p class="editing-note">Original PDF text is read-only. Text and shapes added here are editable overlays.</p>
             <label class="field-label" for="object-text">Content</label>
             <textarea id="object-text" rows="3" placeholder="Select a text object" disabled></textarea>
             <div class="field-row">
@@ -179,7 +180,7 @@
           <section class="inspector-section font-manager" id="font-manager">
             <h3>Local fonts</h3>
             <p>Import a font for this session. It is not installed in Windows.</p>
-            <label class="button button-quiet font-upload" for="font-input">＋ Import TTF / OTF</label>
+            <button id="import-font-btn" class="button button-quiet font-upload" type="button">＋ Import TTF / OTF</button>
             <input id="font-input" type="file" accept=".ttf,.otf" hidden />
             <div id="font-list" class="font-list"><span>Georgia</span><span>Arial</span><span>Segoe UI</span></div>
           </section>

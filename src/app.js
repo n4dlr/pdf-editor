@@ -132,6 +132,7 @@ function updatePageControls() {
   for (const id of ['add-text-btn', 'add-rect-btn', 'add-image-btn', 'add-watermark-btn']) {
     $(id).disabled = !hasDocument;
   }
+  $('ocr-add-text-btn').disabled = !hasDocument || !dom.ocr.value.trim();
 }
 
 function setCurrentDocumentName(name) {
@@ -1198,6 +1199,7 @@ async function runOcr() {
     throw error;
   } finally {
     $('ocr-btn').disabled = !state.pdf;
+    updatePageControls();
   }
 }
 
@@ -1526,16 +1528,17 @@ $('zoom-out-btn').addEventListener('click', runAction(async () => {
   state.zoom = clamp(state.zoom - 0.15, 0.5, 2.5);
   await renderPage();
 }));
-$('add-text-btn').addEventListener('click', () => addObject('text'));
-$('add-rect-btn').addEventListener('click', () => addObject('rect'));
-$('add-watermark-btn').addEventListener('click', () => addObject('watermark'));
-$('add-line-btn').addEventListener('click', () => addPageObject('line'));
-$('add-ellipse-btn').addEventListener('click', () => addPageObject('ellipse'));
-$('add-note-btn').addEventListener('click', () => addPageObject('note'));
-$('add-signature-btn').addEventListener('click', () => {
+$('add-text-btn').addEventListener('click', runAction(() => addObject('text')));
+$('add-rect-btn').addEventListener('click', runAction(() => addObject('rect')));
+$('add-watermark-btn').addEventListener('click', runAction(() => addObject('watermark')));
+$('add-line-btn').addEventListener('click', runAction(() => addPageObject('line')));
+$('add-ellipse-btn').addEventListener('click', runAction(() => addPageObject('ellipse')));
+$('add-note-btn').addEventListener('click', runAction(() => addPageObject('note')));
+$('add-signature-btn').addEventListener('click', runAction(() => {
+  if (!state.pdf) throw new Error('Open a PDF before adding a signature.');
   $('signature-dialog').showModal();
   $('signature-input').focus();
-});
+}));
 $('signature-input').addEventListener('input', () => {
   $('signature-preview').textContent = $('signature-input').value || 'Your signature';
 });
@@ -1544,7 +1547,7 @@ $('signature-form').addEventListener('submit', (event) => {
   const value = $('signature-input').value.trim();
   if (!value) return;
   $('signature-dialog').close();
-  addPageObject('signature');
+  runAction(() => addPageObject('signature'))();
 });
 $('close-signature-btn').addEventListener('click', () => $('signature-dialog').close());
 $('page-number-btn').addEventListener('click', runAction(addPageNumber));
@@ -1576,13 +1579,18 @@ $('page-jump').addEventListener('change', runAction(async () => {
   await renderPage();
 }));
 $('add-image-btn').addEventListener('click', () => dom.image.click());
+$('import-font-btn').addEventListener('click', () => dom.font.click());
 $('save-btn').addEventListener('click', runAction(exportPdf));
 $('split-btn')?.addEventListener('click', runAction(splitCurrentPage));
 $('compress-btn').addEventListener('click', runAction(compressPdf));
 $('rotate-page-btn').addEventListener('click', runAction(rotateCurrentPage));
 $('delete-page-btn').addEventListener('click', runAction(deleteCurrentPage));
 $('ocr-btn').addEventListener('click', runAction(runOcr));
-$('ocr-add-text-btn').addEventListener('click', () => addObject('text', dom.ocr.value.trim()));
+$('ocr-add-text-btn').addEventListener('click', runAction(() => {
+  const text = dom.ocr.value.trim();
+  if (!text) throw new Error('Run OCR or enter recognized text before adding it.');
+  addObject('text', text);
+}));
 $('undo-btn').addEventListener('click', runAction(undo));
 $('redo-btn').addEventListener('click', runAction(redo));
 $('delete-object-btn').addEventListener('click', () => {
@@ -1606,11 +1614,16 @@ $('shortcuts-btn').addEventListener('click', () => $('shortcuts-dialog').showMod
 document.querySelectorAll('.tab').forEach((tab) => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === tab));
-    const target = tab.dataset.tab;
-    if (target === 'ocr') $('ocr-btn').focus();
-    if (target === 'fonts') dom.font.focus();
-    if (target === 'pages') dom.thumbnails.focus();
-    if (target === 'settings') $('language-select').focus();
+    const targets = {
+      edit: [dom.shell, state.pdf ? $('add-text-btn') : dom.open],
+      pages: [dom.thumbnails, dom.thumbnails],
+      ocr: [document.querySelector('.ocr-section'), $('ocr-btn')],
+      fonts: [$('font-manager'), $('import-font-btn')],
+      settings: [document.querySelector('.header-actions'), $('language-select')]
+    };
+    const [region, control] = targets[tab.dataset.tab];
+    region?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    control?.focus({ preventScroll: true });
   });
 });
 

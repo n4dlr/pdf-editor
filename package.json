@@ -11,6 +11,10 @@
     "preview": "vite preview",
     "check": "node --check src/app.js",
     "build:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File ./build-win.ps1",
+    "setup:linux": "bash ./setup-linux.sh",
+    "start:linux": "bash ./start-linux.sh",
+    "setup:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File ./setup-windows.ps1",
+    "start:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File ./start-windows.ps1",
     "tauri": "tauri"
   },
   "dependencies": {

@@ -208,6 +208,7 @@ button:disabled { cursor: default; opacity: .4; }
 .properties-heading { padding-bottom: 18px; }
 .inspector-section { padding: 14px 16px 16px; border-top: 1px solid var(--line-soft); }
 .inspector-section h3 { margin: 0 0 12px; color: var(--strong-text); font-size: 11px; font-weight: 650; }
+.editing-note { margin: -3px 0 12px; color: var(--subtle-text); font-size: 11px; line-height: 1.55; }
 .page-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 .page-action-grid .button { min-height: 31px; }
 .danger { color: var(--danger); }

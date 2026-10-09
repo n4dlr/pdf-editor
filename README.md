@@ -18,6 +18,42 @@ An offline-first Windows desktop PDF workspace built with Tauri 2, PDF.js, Fabri
 
 ## Development
 
+### Linux (Debian / Ubuntu)
+
+Install the system and frontend prerequisites once:
+
+```sh
+./setup-linux.sh
+```
+
+Then start the Tauri desktop app:
+
+```sh
+./start-linux.sh
+```
+
+The setup script installs Tauri's Debian/Ubuntu build libraries with `apt` and runs `npm ci`. It requires Node.js 20 or newer, Rust stable via rustup, and `sudo` access. Other Linux distributions need the equivalent Tauri v2 prerequisites installed with their package manager.
+
+### Windows
+
+Run setup from a Visual Studio Developer PowerShell. The script uses `winget` to install Node.js LTS, Rustup, and Visual Studio 2022 C++ Build Tools if missing; after installing tools, close and reopen Developer PowerShell and rerun setup:
+
+```powershell
+.\setup-windows.ps1
+```
+
+Start the desktop app:
+
+```powershell
+.\start-windows.ps1
+```
+
+The setup script also installs the Windows Rust target and npm dependencies. To build the Windows installer instead, use `.\build-win.ps1` on Windows after setup.
+
+### Browser development
+
+The desktop start scripts launch Tauri. To run only the local Vite development server in a browser:
+
 ```sh
 npm ci
 npm run dev
@@ -39,6 +75,10 @@ To package the Windows NSIS installer, use a Windows machine with Node.js LTS, R
 The installer bundles the application and offline WebView2 runtime. It does not install Office or make changes to Windows font registries. Fonts imported in the app are session-only.
 
 The app UI supports Azerbaijani, Russian, and English, remembers the selected language on this device, and initially follows the operating-system language where possible. The stock Tauri NSIS bundle offers its language selector in English and Russian; Azerbaijani is available inside the app but is not a built-in NSIS installer language.
+
+## Editing model
+
+PDF.js renders each original PDF page into a high-resolution canvas for viewing. The editable canvas above it is an annotation layer: text boxes, shapes, images, signatures, and marks added in the app can be selected and changed. Existing text and images inside the original PDF are not directly editable in this version. The **Copy text** and search actions read the PDF's text layer; OCR recognizes scanned page text and can add its result as a separate annotation, but does not replace the scanned/original content.
 
 ## Local document history
 

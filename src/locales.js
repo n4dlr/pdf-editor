@@ -16,6 +16,8 @@ const translations = {
     'This PDF is no longer in local history.': 'Bu PDF artıq yerli tarixçədə yoxdur.',
     'PDF history cleared': 'PDF tarixçəsi təmizləndi',
     'PDF editor': 'PDF redaktoru', 'Selected object properties': 'Seçilmiş obyektin xüsusiyyətləri',
+    'Original PDF text is read-only. Text and shapes added here are editable overlays.':
+      'PDF-in orijinal mətni yalnız oxumaq üçündür. Burada əlavə edilən mətn və fiqurlar redaktə olunan qatdır.',
     'Interface language': 'İnterfeys dili', 'Annotation tools': 'Qeyd alətləri',
     'Find in document (Ctrl+F)': 'Sənəddə axtar (Ctrl+F)',
     'Keyboard shortcuts (?)': 'Klaviatura qısayolları (?)', 'Open a PDF (Ctrl+O)': 'PDF aç (Ctrl+O)',
@@ -127,6 +129,8 @@ const translations = {
     'This PDF is no longer in local history.': 'Этого PDF больше нет в локальной истории.',
     'PDF history cleared': 'История PDF очищена',
     'PDF editor': 'Редактор PDF', 'Selected object properties': 'Свойства выбранного объекта',
+    'Original PDF text is read-only. Text and shapes added here are editable overlays.':
+      'Исходный текст PDF доступен только для чтения. Добавленные здесь текст и фигуры редактируются как аннотации.',
     'Interface language': 'Язык интерфейса', 'Annotation tools': 'Инструменты аннотаций',
     'Find in document (Ctrl+F)': 'Найти в документе (Ctrl+F)',
     'Keyboard shortcuts (?)': 'Сочетания клавиш (?)', 'Open a PDF (Ctrl+O)': 'Открыть PDF (Ctrl+O)',
