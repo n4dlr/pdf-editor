@@ -1,0 +1,30 @@
+[package]
+name = "super-pdf-studio"
+version = "0.2.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+description = "Offline native PDF editor built with egui and MuPDF"
+default-run = "super-pdf-studio"
+
+[dependencies]
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+directories = "6"
+mupdf = { version = "0.8.0", default-features = false, features = ["base14-fonts"] }
+rfd = "0.15"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "bmp"] }
+
+[target.'cfg(target_os = "windows")'.build-dependencies]
+winresource = "0.1"
+
+[package.metadata.deb]
+maintainer = "Super PDF Studio contributors"
+copyright = "2026, Super PDF Studio contributors"
+extended-description = "Offline native PDF viewer and editor powered by egui and MuPDF."
+section = "graphics"
+priority = "optional"
+assets = [
+  ["target/release/super-pdf-studio", "usr/bin/", "755"],
+  ["packaging/linux/super-pdf-studio.desktop", "usr/share/applications/", "644"],
+]

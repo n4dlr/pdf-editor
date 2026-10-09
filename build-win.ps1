@@ -7,36 +7,39 @@ if ($env:OS -ne 'Windows_NT') {
     throw 'Run this script on Windows. Tauri Windows installers must be built on Windows.'
 }
 
-foreach ($command in @('node', 'npm', 'rustc', 'cargo')) {
+foreach ($command in @('rustc', 'cargo')) {
     if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
         throw "Required build tool not found: $command. Install Node.js LTS and Rust with the MSVC toolchain."
     }
 }
 
-Write-Host 'Installing locked frontend dependencies...'
-npm ci
+$llvmCandidates = @(
+    (Join-Path $env:ProgramFiles 'LLVM\bin'),
+    (Join-Path ${env:ProgramFiles(x86)} 'LLVM\bin')
+)
+$llvmBin = $llvmCandidates | Where-Object {
+    Test-Path (Join-Path $_ 'libclang.dll')
+} | Select-Object -First 1
+if (-not $llvmBin) {
+    throw 'MuPDF needs LLVM libclang.dll to generate its Rust bindings. Install LLVM for Windows, then rerun this script.'
+}
+$env:LIBCLANG_PATH = $llvmBin
+$env:PATH = "$llvmBin;$env:PATH"
+
+Write-Host 'Building the native Windows executable...'
+cargo build --locked --release --manifest-path .\native\Cargo.toml
 if ($LASTEXITCODE -ne 0) {
-    throw "npm ci failed with exit code $LASTEXITCODE"
+    throw "Native Windows build failed with exit code $LASTEXITCODE"
 }
 
-Write-Host 'Building the Windows NSIS installer...'
-npx tauri build --bundles nsis
-if ($LASTEXITCODE -ne 0) {
-    throw "Tauri build failed with exit code $LASTEXITCODE"
-}
-
-$bundleDir = Join-Path $projectRoot 'src-tauri\target\release\bundle\nsis'
-$installer = Get-ChildItem -Path $bundleDir -Filter '*-setup.exe' -File |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 1
-
-if (-not $installer) {
-    throw "Tauri completed without producing an NSIS setup in $bundleDir"
+$exe = Join-Path $projectRoot 'native\target\release\super-pdf-studio.exe'
+if (-not (Test-Path $exe)) {
+    throw "Cargo completed without producing $exe"
 }
 
 $outputDir = Join-Path $projectRoot 'artifacts'
 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
-$outputPath = Join-Path $outputDir 'SuperPDFStudio_Setup.exe'
-Copy-Item -Path $installer.FullName -Destination $outputPath -Force
+$outputPath = Join-Path $outputDir 'SuperPDFStudio.exe'
+Copy-Item -Path $exe -Destination $outputPath -Force
 
-Write-Host "Setup created: $outputPath"
+Write-Host "Windows executable created: $outputPath"

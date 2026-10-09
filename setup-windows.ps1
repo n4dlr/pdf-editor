@@ -12,11 +12,6 @@ if (-not $winget) {
     throw 'Install App Installer (winget) from Microsoft Store, then rerun this script.'
 }
 
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    winget install --id OpenJS.NodeJS.LTS --exact --accept-package-agreements --accept-source-agreements
-    if ($LASTEXITCODE -ne 0) { throw "winget could not install Node.js (exit code $LASTEXITCODE)." }
-}
-
 if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
     winget install --id Rustlang.Rustup --exact --accept-package-agreements --accept-source-agreements
     if ($LASTEXITCODE -ne 0) { throw "winget could not install Rustup (exit code $LASTEXITCODE)." }
@@ -29,17 +24,24 @@ if (-not (Get-Command cl -ErrorAction SilentlyContinue)) {
     if ($LASTEXITCODE -ne 0) { throw "winget could not install Visual Studio C++ Build Tools (exit code $LASTEXITCODE)." }
 }
 
-if (-not (Get-Command node -ErrorAction SilentlyContinue) -or
-    -not (Get-Command cargo -ErrorAction SilentlyContinue) -or
+if (-not (Get-Command cargo -ErrorAction SilentlyContinue) -or
     -not (Get-Command cl -ErrorAction SilentlyContinue)) {
     Write-Host 'Tool installation completed or is pending. Close this terminal, open a Visual Studio Developer PowerShell, and rerun .\setup-windows.ps1.'
     exit 0
 }
 
-$nodeMajor = [int](node -p "process.versions.node.split('.')[0]")
-if ($nodeMajor -lt 20) {
-    throw "Node.js 20 or newer is required; found $(node --version)."
+$llvmCandidates = @(
+    (Join-Path $env:ProgramFiles 'LLVM\bin'),
+    (Join-Path ${env:ProgramFiles(x86)} 'LLVM\bin')
+)
+$llvmBin = $llvmCandidates | Where-Object {
+    Test-Path (Join-Path $_ 'libclang.dll')
+} | Select-Object -First 1
+if (-not $llvmBin) {
+    throw 'MuPDF requires LLVM libclang.dll. Install LLVM for Windows, then rerun this script.'
 }
+$env:LIBCLANG_PATH = $llvmBin
+$env:PATH = "$llvmBin;$env:PATH"
 
 rustup toolchain install stable
 if ($LASTEXITCODE -ne 0) { throw "rustup could not install the stable toolchain (exit code $LASTEXITCODE)." }
@@ -47,10 +49,8 @@ rustup default stable
 if ($LASTEXITCODE -ne 0) { throw "rustup could not select the stable toolchain (exit code $LASTEXITCODE)." }
 rustup target add x86_64-pc-windows-msvc
 if ($LASTEXITCODE -ne 0) { throw "rustup could not add the MSVC target (exit code $LASTEXITCODE)." }
-npm ci
-if ($LASTEXITCODE -ne 0) { throw "npm ci failed (exit code $LASTEXITCODE)." }
-npm run check
-if ($LASTEXITCODE -ne 0) { throw "npm run check failed (exit code $LASTEXITCODE)." }
+cargo check --manifest-path .\native\Cargo.toml
+if ($LASTEXITCODE -ne 0) { throw "cargo check failed (exit code $LASTEXITCODE)." }
 
 Write-Host 'Windows dependencies are ready.'
-Write-Host 'Run .\start-windows.ps1 to start the Tauri desktop app, or npm run dev for browser development.'
+Write-Host 'Run .\start-windows.ps1 to launch the desktop app, or .\build-win.ps1 to build the Windows executable.'

@@ -1,95 +1,93 @@
 # Super PDF Studio
 
-An offline-first Windows desktop PDF workspace built with Tauri 2, PDF.js, Fabric.js, Tesseract.js, and pdf-lib.
+[![Native desktop builds](https://github.com/n4dlr/web-pdf/actions/workflows/native-build.yml/badge.svg)](https://github.com/n4dlr/web-pdf/actions/workflows/native-build.yml)
+
+Super PDF Studio is an offline native PDF viewer and editor for Linux and Windows. The desktop interface is written in Rust with egui/eframe and uses MuPDF for PDF rendering and editing; it does not require a browser or WebView.
 
 ## Features
 
-- Render PDF pages locally and navigate via lazy-loaded thumbnails.
-- Search text across the PDF with page-jump results and on-page match highlights.
-- Add editable text, shapes, images, watermarks, pen strokes, highlighter marks, lines, ellipses, sticky notes, typed signatures, and page numbers.
-- Use object selection, keyboard nudging, color/opacity/font/alignment controls, layer order, undo/redo, and multi-select.
-- Reorder pages by dragging thumbnails, duplicate or insert pages, rotate or delete pages, export one page, or merge PDFs.
-- Copy the selectable text from the current page and pan/zoom around large pages.
-- Run English OCR against the visible page using bundled Tesseract.js worker, WASM, and language data.
-- Import TTF/OTF fonts for the current application session using the browser FontFace API.
-- Export annotations as raster overlays while retaining the original PDF page content.
-- Toggle dark/light appearance. PDF input and OCR do not require network access.
-- Keep the last 12 opened PDFs in local browser storage and reopen them from the Recent documents list.
+- Open and view PDFs, navigate pages, zoom, and access recently opened documents after restarting.
+- Search page text, copy the current page's text, and replace unique text matches in the PDF content.
+- Insert page text, lines, rectangles, ellipses, and images.
+- Rotate, reorder, duplicate, delete, and add blank pages; export a page or merge another PDF.
+- Undo and redo document edits, then save to a new PDF file.
+- Azerbaijani, Russian, and English interface with the selected language saved locally.
+- Work offline; documents and preferences remain on the local device.
 
-## Development
+The current native release does not include OCR, custom font installation, or editing of existing embedded images/text other than the unique text replacement tool. Annotations and inserted content are committed to the PDF by MuPDF. Memory use varies with document size and page complexity; a fixed RAM footprint is not guaranteed.
 
-### Linux (Debian / Ubuntu)
+## Project layout
 
-Install the system and frontend prerequisites once:
+- `native/` — the native Rust/egui application and MuPDF integration.
+- `setup-linux.sh`, `start-linux.sh`, `build-linux.sh` — Debian/Ubuntu setup, launch, and package scripts.
+- `setup-windows.ps1`, `start-windows.ps1`, `build-win.ps1` — Windows setup, launch, and executable build scripts.
+- `.github/workflows/native-build.yml` — CI jobs for Linux and Windows release artifacts.
+
+The native desktop app is the supported application entry point. The older browser/Tauri source tree remains in the repository but is not used by the native build or the scripts documented here.
+
+## Requirements
+
+- Rust stable and Cargo.
+- Linux: Debian/Ubuntu development libraries for egui, FreeType, fontconfig, X11/Wayland, and MuPDF's bundled native build (see setup script).
+- Windows: Visual Studio 2022 Build Tools with the **Desktop development with C++** workload and Windows SDK, Rust's MSVC toolchain, and LLVM with `libclang.dll` for MuPDF's Rust bindings.
+
+## Linux
+
+On Debian or Ubuntu, install build prerequisites:
 
 ```sh
 ./setup-linux.sh
 ```
 
-Then start the Tauri desktop app:
+Run the native application:
 
 ```sh
 ./start-linux.sh
 ```
 
-The setup script installs Tauri's Debian/Ubuntu build libraries with `apt` and runs `npm ci`. It requires Node.js 20 or newer, Rust stable via rustup, and `sudo` access. Other Linux distributions need the equivalent Tauri v2 prerequisites installed with their package manager.
+Build the release binary and Debian package:
 
-### Windows
+```sh
+./build-linux.sh
+```
 
-Run setup from a Visual Studio Developer PowerShell. The script uses `winget` to install Node.js LTS, Rustup, and Visual Studio 2022 C++ Build Tools if missing; after installing tools, close and reopen Developer PowerShell and rerun setup:
+The outputs are `native/target/release/super-pdf-studio` and `artifacts/SuperPDFStudio_Linux.deb`. `cargo-deb` is installed by the setup script.
+The current x86_64 Debian package requires `libc6` 2.39 or newer, matching the build environment.
+
+## Windows
+
+Run setup from PowerShell after installing Visual Studio 2022 Build Tools with its C++ workload:
 
 ```powershell
 .\setup-windows.ps1
 ```
 
-Start the desktop app:
+Run the desktop app:
 
 ```powershell
 .\start-windows.ps1
 ```
 
-The setup script also installs the Windows Rust target and npm dependencies. To build the Windows installer instead, use `.\build-win.ps1` on Windows after setup.
-
-### Browser development
-
-The desktop start scripts launch Tauri. To run only the local Vite development server in a browser:
-
-```sh
-npm ci
-npm run dev
-```
-
-Before building, `scripts/prepare-offline-assets.mjs` copies Tesseract.js worker, WASM, and English model files into the app's local public assets.
-
-```sh
-npm run check
-npm run build
-```
-
-To package the Windows NSIS installer, use a Windows machine with Node.js LTS, Rust/MSVC, and the Tauri prerequisites installed:
+Build the standalone release executable:
 
 ```powershell
 .\build-win.ps1
 ```
 
-The installer bundles the application and offline WebView2 runtime. It does not install Office or make changes to Windows font registries. Fonts imported in the app are session-only.
+The executable is copied to `artifacts\SuperPDFStudio.exe`. Windows builds must be compiled on Windows using the MSVC toolchain; the Linux script does not cross-compile it.
 
-The app UI supports Azerbaijani, Russian, and English, remembers the selected language on this device, and initially follows the operating-system language where possible. The stock Tauri NSIS bundle offers its language selector in English and Russian; Azerbaijani is available inside the app but is not a built-in NSIS installer language.
+## GitHub release builds
 
-## Editing model
+Every push to `main`, pull request, or manually dispatched workflow runs the native build on GitHub Actions. The workflow builds the Linux Debian package and Windows x86_64 executable independently and uploads them as run artifacts for 30 days.
 
-PDF.js renders each original PDF page into a high-resolution canvas for viewing. The editable canvas above it is an annotation layer: text boxes, shapes, images, signatures, and marks added in the app can be selected and changed. Existing text and images inside the original PDF are not directly editable in this version. The **Copy text** and search actions read the PDF's text layer; OCR recognizes scanned page text and can add its result as a separate annotation, but does not replace the scanned/original content.
+To download a build, open the [Native desktop builds workflow](https://github.com/n4dlr/web-pdf/actions/workflows/native-build.yml), select a successful run, and download `SuperPDFStudio-Linux-x86_64` or `SuperPDFStudio-Windows-x86_64` from its **Artifacts** section. These are CI artifacts, not signed installers or permanent GitHub Releases.
 
-## Local document history
+Both launch scripts accept an optional PDF path, for example `./start-linux.sh ./document.pdf` or `.\start-windows.ps1 .\document.pdf`.
 
-The app keeps copies of up to 12 recently opened PDFs in this browser profile using IndexedDB, so they can be reopened after restarting the app or refreshing the page. Use the clock button to open history, remove one entry, or clear all saved copies. This storage stays on the device; browser storage can still be removed by clearing site data.
+## Local preferences and recent documents
 
-## Notes and limits
+The application stores its language selection and up to 16 recent PDF file paths in the operating system's standard per-user configuration directory. It stores paths, not copies of PDF documents. A recent item can no longer be opened if its original file was moved or deleted.
 
-- OCR currently supports the bundled English model and runs on the current page.
-- The Optimize action rewrites PDF object streams without lossy image recompression; it may not reduce every file's size.
-- Annotations are exported as page-sized PNG overlays, so their appearance is preserved but they are not native PDF text objects.
-- The application keeps document data on the device. No specific RAM footprint is guaranteed; memory use depends on document size and page complexity.
-- Microsoft Office requires separately licensed installation media and is not bundled or activated by this project.
-- The typed signature tool adds a visual signature annotation only; it is not a cryptographic PDF signature.
-- Search reads the PDF text layer; use OCR first on scanned pages.
+## Licensing
+
+This application links MuPDF, which is licensed under AGPL-3.0. See [LICENSE](./LICENSE) and ensure your distribution complies with the licenses of all bundled dependencies. In particular, distributions of the MuPDF-linked application must comply with the applicable AGPL source and notice requirements.

@@ -9,16 +9,11 @@ if [[ "$(uname -s)" != "Linux" ]]; then
   exit 1
 fi
 
-for command_name in node npm cargo; do
+for command_name in cargo; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
     printf 'Missing required command: %s. Run ./setup-linux.sh first.\n' "$command_name" >&2
     exit 1
   fi
 done
 
-if [[ ! -d node_modules ]]; then
-  printf 'Frontend dependencies are missing. Run ./setup-linux.sh first.\n' >&2
-  exit 1
-fi
-
-npm run tauri -- dev
+cargo run --manifest-path native/Cargo.toml -- "$@"

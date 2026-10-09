@@ -1,3 +1,7 @@
+param(
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$PdfPath
+)
 $ErrorActionPreference = 'Stop'
 
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -7,17 +11,17 @@ if ($env:OS -ne 'Windows_NT') {
     throw 'This start script is for Windows only.'
 }
 
-foreach ($command in @('node', 'npm', 'cargo')) {
+foreach ($command in @('cargo')) {
     if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
         throw "Missing required command: $command. Run .\setup-windows.ps1 first, then reopen this terminal."
     }
 }
 
-if (-not (Test-Path (Join-Path $projectRoot 'node_modules'))) {
-    throw 'Frontend dependencies are missing. Run .\setup-windows.ps1 first.'
+if ($PdfPath.Count -gt 0) {
+    cargo run --manifest-path .\native\Cargo.toml -- $PdfPath
+} else {
+    cargo run --manifest-path .\native\Cargo.toml
 }
-
-npm run tauri -- dev
 if ($LASTEXITCODE -ne 0) {
-    throw "Tauri exited with code $LASTEXITCODE"
+    throw "Native app exited with code $LASTEXITCODE"
 }

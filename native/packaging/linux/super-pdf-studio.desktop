@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Super PDF Studio
+Comment=Offline native PDF editor
+Exec=super-pdf-studio %F
+Terminal=false
+Type=Application
+Categories=Office;Graphics;
+MimeType=application/pdf;
