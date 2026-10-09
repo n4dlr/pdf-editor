@@ -19,6 +19,7 @@ The current native release does not include OCR, custom font installation, or ed
 ## Project layout
 
 - `native/` — the native Rust/egui application and MuPDF integration.
+- `native/vendor/mupdf/` — the upstream MuPDF Rust wrapper with a small MSVC bindgen compatibility fix.
 - `setup-linux.sh`, `start-linux.sh`, `build-linux.sh` — Debian/Ubuntu setup, launch, and package scripts.
 - `setup-windows.ps1`, `start-windows.ps1`, `build-win.ps1` — Windows setup, launch, and executable build scripts.
 - `.github/workflows/native-build.yml` — CI jobs for Linux and Windows release artifacts.
@@ -90,4 +91,4 @@ The application stores its language selection and up to 16 recent PDF file paths
 
 ## Licensing
 
-This application links MuPDF, which is licensed under AGPL-3.0. See [LICENSE](./LICENSE) and ensure your distribution complies with the licenses of all bundled dependencies. In particular, distributions of the MuPDF-linked application must comply with the applicable AGPL source and notice requirements.
+This application links MuPDF, which is licensed under AGPL-3.0. The vendored Rust wrapper is based on upstream `mupdf` 0.8.0; its only local source patch supplies the 8-byte MSVC `max_align_t` alignment type when bindgen omits it. See [LICENSE](./LICENSE) and ensure your distribution complies with the licenses of all bundled dependencies. In particular, distributions of the MuPDF-linked application must comply with the applicable AGPL source and notice requirements.
