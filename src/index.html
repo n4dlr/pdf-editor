@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101419" />
+    <title>Super PDF Studio</title>
+  </head>
+  <body>
+    <div class="app-frame">
+      <header class="app-header">
+        <a class="brand" href="#" aria-label="Super PDF Studio home">
+          <span class="brand-icon" aria-hidden="true">S</span>
+          <span class="brand-name">Super <b>PDF</b></span>
+        </a>
+        <nav class="workspace-tabs" aria-label="Workspace">
+          <button class="tab active" data-tab="edit">Edit</button>
+          <button class="tab" data-tab="pages">Page tools</button>
+          <button class="tab" data-tab="ocr">OCR &amp; transform</button>
+          <button class="tab" data-tab="fonts">Fonts</button>
+          <button class="tab" data-tab="settings">Settings</button>
+        </nav>
+        <div class="header-actions">
+          <button id="search-btn" class="icon-button" title="Find in document (Ctrl+F)" aria-label="Find in document">⌕</button>
+          <button id="recent-btn" class="icon-button recent-trigger" title="Recent documents" aria-label="Recent documents">◷</button>
+          <span class="offline-badge"><i></i> Offline</span>
+          <label class="language-picker" for="language-select" aria-label="Interface language">
+            <span aria-hidden="true">文</span>
+            <select id="language-select" title="Interface language">
+              <option value="en">English</option>
+              <option value="az">Azərbaycan</option>
+              <option value="ru">Русский</option>
+            </select>
+          </label>
+          <button id="theme-btn" class="theme-button" type="button">Light mode</button>
+          <button id="shortcuts-btn" class="icon-button shortcuts-button" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
+          <button id="open-file-btn" class="button button-open" title="Open a PDF (Ctrl+O)">
+            <span aria-hidden="true">＋</span> Open PDF
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="pages-panel" aria-label="Document pages">
+          <div class="panel-heading">
+            <div>
+              <span class="overline">DOCUMENT</span>
+              <h2>Pages <span id="page-count" class="count-pill">0</span></h2>
+            </div>
+            <button id="add-pages-btn" class="icon-button" title="Add or merge PDFs" aria-label="Add or merge PDFs">＋</button>
+          </div>
+          <div id="document-name" class="document-name">No document open</div>
+          <div id="thumbnail-list" class="thumbnail-list">
+            <div class="empty-pages">
+              <span class="empty-icon" aria-hidden="true">▧</span>
+              <span>Open a PDF to see its pages</span>
+            </div>
+          </div>
+          <div class="sidebar-footer"><p>Drag pages to reorder</p></div>
+        </aside>
+
+        <section class="editor" aria-label="PDF editor">
+          <div class="document-toolbar">
+            <div class="toolbar-cluster">
+              <button id="undo-btn" class="icon-button" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>↶</button>
+              <button id="redo-btn" class="icon-button" title="Redo (Ctrl+Y)" aria-label="Redo" disabled>↷</button>
+              <span class="toolbar-divider"></span>
+              <button id="add-text-btn" class="tool-button"><span class="tool-glyph">T</span> Text</button>
+              <button id="add-rect-btn" class="tool-button"><span class="tool-glyph">▱</span> Shape</button>
+              <button id="add-image-btn" class="tool-button"><span class="tool-glyph">▧</span> Image</button>
+              <button id="add-watermark-btn" class="tool-button"><span class="tool-glyph">◈</span> Mark</button>
+            </div>
+            <div class="toolbar-cluster toolbar-end">
+              <button id="zoom-out-btn" class="icon-button" title="Zoom out" aria-label="Zoom out">−</button>
+              <span id="zoom-label" class="zoom-label">100%</span>
+              <button id="zoom-in-btn" class="icon-button" title="Zoom in" aria-label="Zoom in">+</button>
+              <span class="toolbar-divider"></span>
+              <button id="save-btn" class="button button-accent" disabled>Save / export</button>
+            </div>
+          </div>
+          <div class="annotation-toolbar" aria-label="Annotation tools">
+            <span class="annotation-label">ANNOTATE</span>
+            <button class="tool-button annotation-tool" data-draw="pen" title="Freehand pen · P"><span class="tool-glyph">⌁</span> Pen</button>
+            <button class="tool-button annotation-tool" data-draw="highlight" title="Highlighter · H"><span class="tool-glyph">▰</span> Highlight</button>
+            <button id="add-line-btn" class="tool-button" title="Add line">╱ Line</button>
+            <button id="add-ellipse-btn" class="tool-button" title="Add ellipse">◯ Oval</button>
+            <button id="add-note-btn" class="tool-button" title="Add sticky note">▤ Note</button>
+            <button id="add-signature-btn" class="tool-button" title="Add typed signature">✒ Sign</button>
+            <span class="annotation-divider"></span>
+            <button id="page-number-btn" class="tool-button" title="Add page number"># Page no.</button>
+            <button id="copy-text-btn" class="tool-button" title="Copy selectable page text">Copy text</button>
+            <button id="stop-draw-btn" class="tool-button draw-stop" title="Return to select mode" hidden>Done drawing</button>
+          </div>
+
+          <div id="canvas-shell" class="canvas-shell">
+            <div id="empty-state" class="empty-state">
+              <div class="empty-art" aria-hidden="true"><span>PDF</span><i>＋</i></div>
+              <h1>Your pages, your way.</h1>
+              <p>Open a PDF to annotate, rearrange pages and work locally.</p>
+              <button id="empty-open-btn" class="button button-accent">Choose a PDF</button>
+              <span class="privacy-note"><i></i> Files stay on this device</span>
+              <section class="recent-section" aria-labelledby="recent-heading">
+                <div class="recent-heading">
+                  <h2 id="recent-heading">Recent documents</h2>
+                  <button id="clear-recent-btn" class="text-button" type="button" hidden>Clear history</button>
+                </div>
+                <div id="recent-list" class="recent-list" aria-live="polite">
+                  <span class="recent-empty">PDFs you open will appear here.</span>
+                </div>
+              </section>
+            </div>
+            <div id="page-stage" class="page-stage" hidden>
+              <canvas id="base-canvas"></canvas>
+              <canvas id="search-canvas" aria-hidden="true"></canvas>
+              <canvas id="overlay-canvas"></canvas>
+            </div>
+          </div>
+
+          <footer class="editor-status">
+            <div class="status-left"><span class="status-dot"></span><span id="status-message">Ready · files never leave your device</span></div>
+            <div class="status-right">
+              <button id="prev-page-btn" class="status-nav" title="Previous page (Alt+Left)" disabled>‹</button>
+              <label class="page-jump-label"><input id="page-jump" type="number" min="1" value="0" aria-label="Go to page" disabled><span id="page-total">of 0</span></label>
+              <button id="next-page-btn" class="status-nav" title="Next page (Alt+Right)" disabled>›</button>
+              <span class="status-separator">/</span><span id="page-size">—</span>
+            </div>
+          </footer>
+        </section>
+
+        <aside class="properties-panel" aria-label="Selected object properties">
+          <div class="panel-heading properties-heading">
+            <div><span class="overline">INSPECTOR</span><h2>Properties</h2></div>
+            <span id="selection-type" class="selection-type">PAGE</span>
+          </div>
+
+          <section class="inspector-section">
+            <h3>Page</h3>
+            <div class="page-action-grid">
+              <button id="rotate-page-btn" class="button button-quiet" disabled><span>⟳</span> Rotate</button>
+              <button id="delete-page-btn" class="button button-quiet danger" disabled><span>×</span> Delete</button>
+              <button id="split-btn" class="button button-quiet" disabled><span>⤓</span> Export page</button>
+              <button id="compress-btn" class="button button-quiet" disabled><span>⌁</span> Optimize</button>
+              <button id="duplicate-page-btn" class="button button-quiet" disabled><span>▣</span> Duplicate</button>
+              <button id="insert-page-btn" class="button button-quiet" disabled><span>＋</span> Blank page</button>
+            </div>
+          </section>
+
+          <section class="inspector-section object-inspector" id="object-inspector">
+            <h3>Selected object</h3>
+            <label class="field-label" for="object-text">Content</label>
+            <textarea id="object-text" rows="3" placeholder="Select a text object" disabled></textarea>
+            <div class="field-row">
+              <label class="field-label" for="object-font">Font</label>
+              <select id="object-font" disabled><option value="Georgia">Georgia</option><option value="Arial">Arial</option><option value="Segoe UI">Segoe UI</option></select>
+            </div>
+            <div class="field-row two-columns">
+              <div><label class="field-label" for="object-size">Size</label><input id="object-size" type="number" min="6" max="144" value="24" disabled /></div>
+              <div><label class="field-label" for="object-color">Color</label><input id="object-color" type="color" value="#24313a" disabled /></div>
+            </div>
+            <div class="field-row">
+              <label class="field-label" for="object-opacity">Opacity <output id="opacity-label">100%</output></label>
+              <input id="object-opacity" type="range" min="0" max="100" value="100" disabled />
+            </div>
+            <div class="field-row">
+              <span class="field-label">Align</span>
+              <div class="align-buttons">
+                <button data-align="left" title="Align left" disabled>≡</button>
+                <button data-align="center" title="Align center" disabled>☰</button>
+                <button data-align="right" title="Align right" disabled>≡</button>
+              </div>
+            </div>
+            <div class="layer-actions">
+              <button id="layer-back-btn" class="button button-quiet" disabled>Send backward</button>
+              <button id="layer-front-btn" class="button button-quiet" disabled>Bring forward</button>
+            </div>
+            <button id="delete-object-btn" class="button button-quiet danger full-width" disabled>Delete object</button>
+          </section>
+
+          <section class="inspector-section font-manager" id="font-manager">
+            <h3>Local fonts</h3>
+            <p>Import a font for this session. It is not installed in Windows.</p>
+            <label class="button button-quiet font-upload" for="font-input">＋ Import TTF / OTF</label>
+            <input id="font-input" type="file" accept=".ttf,.otf" hidden />
+            <div id="font-list" class="font-list"><span>Georgia</span><span>Arial</span><span>Segoe UI</span></div>
+          </section>
+
+          <section class="inspector-section ocr-section">
+            <div class="section-title-row"><h3>Extract text</h3><button id="ocr-btn" class="text-button" disabled>Run OCR</button></div>
+            <p id="ocr-status">Local English OCR · current page</p>
+            <textarea id="ocr-output" rows="5" placeholder="Recognized text will appear here…" readonly></textarea>
+            <button id="ocr-add-text-btn" class="button button-quiet full-width" disabled>Add result as text</button>
+          </section>
+        </aside>
+      </main>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      <dialog id="shortcuts-dialog" class="shortcuts-dialog">
+        <form method="dialog">
+          <div class="dialog-heading">
+            <div><span class="overline">QUICK REFERENCE</span><h2>Keyboard shortcuts</h2></div>
+            <button class="icon-button" aria-label="Close shortcuts">×</button>
+          </div>
+          <div class="shortcut-list">
+            <div><span>Open PDF</span><kbd>Ctrl</kbd><b>+</b><kbd>O</kbd></div>
+            <div><span>Find in document</span><kbd>Ctrl</kbd><b>+</b><kbd>F</kbd></div>
+            <div><span>Save / export</span><kbd>Ctrl</kbd><b>+</b><kbd>S</kbd></div>
+            <div><span>Undo / redo</span><kbd>Ctrl</kbd><b>+</b><kbd>Z</kbd><i> / </i><kbd>Ctrl</kbd><b>+</b><kbd>Y</kbd></div>
+            <div><span>Redo (alternate)</span><kbd>Ctrl</kbd><b>+</b><kbd>Shift</kbd><b>+</b><kbd>Z</kbd></div>
+            <div><span>Zoom in / out</span><kbd>Ctrl</kbd><b>+</b><kbd>+</kbd><i> / </i><kbd>Ctrl</kbd><b>+</b><kbd>−</kbd></div>
+            <div><span>Fit to 100%</span><kbd>Ctrl</kbd><b>+</b><kbd>0</kbd></div>
+            <div><span>Previous / next page</span><kbd>Alt</kbd><b>+</b><kbd>←</kbd><i> / </i><kbd>Alt</kbd><b>+</b><kbd>→</kbd></div>
+            <div><span>Step through pages</span><kbd>PageUp</kbd><i> / </i><kbd>PageDown</kbd></div>
+            <div><span>Jump to first / last page</span><kbd>Ctrl</kbd><b>+</b><kbd>Home</kbd><i> / </i><kbd>Ctrl</kbd><b>+</b><kbd>End</kbd></div>
+            <div><span>Move selected object</span><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd><i> · Shift = 10 px</i></div>
+            <div><span>Pen / highlighter</span><kbd>P</kbd><i> / </i><kbd>H</kbd><i> · Escape to stop</i></div>
+            <div><span>Pan / zoom canvas</span><kbd>Space</kbd><i> + drag</i><i> · Ctrl + wheel to zoom</i></div>
+            <div><span>Delete selected object</span><kbd>Delete</kbd></div>
+            <div><span>Show this panel</span><kbd>?</kbd></div>
+          </div>
+          <p class="dialog-note">Shortcuts that change objects are disabled while editing text or typing in a field.</p>
+        </form>
+      </dialog>
+      <dialog id="recent-dialog" class="shortcuts-dialog recent-dialog">
+        <form method="dialog">
+          <div class="dialog-heading">
+            <div><span class="overline">LOCAL FILES</span><h2>Recent documents</h2></div>
+            <button id="close-recent-btn" type="button" class="icon-button" aria-label="Close history">×</button>
+          </div>
+          <p class="dialog-note recent-privacy">PDF copies in this list are stored only in this browser profile. Up to 12 recent documents are kept.</p>
+          <div id="recent-dialog-list" class="recent-list" aria-live="polite"></div>
+          <button id="clear-recent-dialog-btn" class="button button-quiet full-width" type="button">Clear history</button>
+        </form>
+      </dialog>
+      <dialog id="search-dialog" class="shortcuts-dialog search-dialog">
+        <form id="search-form">
+          <div class="dialog-heading">
+            <div><span class="overline">DOCUMENT SEARCH</span><h2>Find in this PDF</h2></div>
+            <button id="close-search-btn" type="button" class="icon-button" aria-label="Close search">×</button>
+          </div>
+          <div class="search-input-row">
+            <input id="search-input" type="search" placeholder="Search words or a phrase…" autocomplete="off" />
+            <button class="button button-accent" type="submit">Find</button>
+          </div>
+          <div id="search-progress" class="search-progress">Text search runs locally across every page.</div>
+          <div id="search-results" class="search-results"><div class="search-empty">Enter a phrase to search the document.</div></div>
+          <p class="dialog-note">Scanned pages without a text layer can be searched after running OCR on those pages.</p>
+        </form>
+      </dialog>
+      <dialog id="signature-dialog" class="shortcuts-dialog signature-dialog">
+        <form id="signature-form">
+          <div class="dialog-heading">
+            <div><span class="overline">ANNOTATION</span><h2>Add a signature</h2></div>
+            <button id="close-signature-btn" type="button" class="icon-button" aria-label="Close signature">×</button>
+          </div>
+          <label class="field-label" for="signature-input">Type the name to place on this page</label>
+          <input id="signature-input" class="signature-input" maxlength="80" placeholder="Your name" required />
+          <div class="signature-preview" id="signature-preview">Your signature</div>
+          <button type="submit" class="button button-accent full-width">Place signature</button>
+          <p class="dialog-note">This creates a visual annotation, not a cryptographic digital signature.</p>
+        </form>
+      </dialog>
+    </div>
+
+    <input id="file-input" type="file" accept="application/pdf,.pdf" hidden />
+    <input id="merge-input" type="file" accept="application/pdf,.pdf" multiple hidden />
+    <input id="image-input" type="file" accept="image/*" hidden />
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

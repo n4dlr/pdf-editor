@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Super PDF Studio",
+  "version": "0.1.0",
+  "identifier": "com.superpdfstudio.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Super PDF Studio",
+        "width": 1400,
+        "height": 920,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": [],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "both",
+        "languages": ["English", "Russian"],
+        "displayLanguageSelector": true,
+        "startMenuFolder": "Super PDF Studio"
+      }
+    }
+  }
+}
