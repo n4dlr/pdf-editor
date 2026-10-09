@@ -789,7 +789,13 @@ impl PdfEditorApp {
         };
         let before = self.current_bytes()?;
         let mut staged = PdfDocument::from_bytes(&before).map_err(|error| error.to_string())?;
-        let source = PdfDocument::open(path.as_path()).map_err(|error| error.to_string())?;
+        #[cfg(windows)]
+        let path_for_mupdf = path
+            .to_str()
+            .ok_or_else(|| "MuPDF requires a UTF-8 file path on Windows.".to_owned())?;
+        #[cfg(not(windows))]
+        let path_for_mupdf = path.as_path();
+        let source = PdfDocument::open(path_for_mupdf).map_err(|error| error.to_string())?;
         let result = staged
             .insert_pdf(
                 &source,
