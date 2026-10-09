@@ -13,21 +13,8 @@ foreach ($command in @('rustc', 'cargo')) {
     }
 }
 
-$llvmCandidates = @(
-    (Join-Path $env:ProgramFiles 'LLVM\bin'),
-    (Join-Path ${env:ProgramFiles(x86)} 'LLVM\bin')
-)
-$llvmBin = $llvmCandidates | Where-Object {
-    Test-Path (Join-Path $_ 'libclang.dll')
-} | Select-Object -First 1
-if (-not $llvmBin) {
-    throw 'MuPDF needs LLVM libclang.dll to generate its Rust bindings. Install LLVM for Windows, then rerun this script.'
-}
-$env:LIBCLANG_PATH = $llvmBin
-$env:PATH = "$llvmBin;$env:PATH"
-
 Write-Host 'Building the native Windows executable...'
-cargo build --locked --release --manifest-path .\native\Cargo.toml
+cargo build --release --manifest-path .\native\Cargo.toml
 if ($LASTEXITCODE -ne 0) {
     throw "Native Windows build failed with exit code $LASTEXITCODE"
 }

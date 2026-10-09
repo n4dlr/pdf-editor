@@ -2,6 +2,35 @@ const translations = {
   en: {},
   az: {
     'Workspace': 'İş sahəsi', 'Document pages': 'Sənədin səhifələri',
+    'Source text uses the MuPDF replacement tool below. Objects added here remain editable annotations.':
+      'Mənbə mətni aşağıdakı MuPDF aləti ilə dəyişdirilir. Burada əlavə olunan obyektlər redaktə olunan qeydlər olaraq qalır.',
+    'Replace original PDF text': 'PDF-in orijinal mətnini dəyişdir',
+    'MuPDF removes the matched text from the current page. Use an exact, unique phrase.':
+      'MuPDF uyğun gələn mətni cari səhifədən silir. Dəqiq və unikal ifadə daxil edin.',
+    'Text to find on this page': 'Bu səhifədə axtarılacaq mətn',
+    'Exact existing PDF text': 'PDF-dəki dəqiq mətn',
+    'Replace with (leave blank to remove)': 'Bununla əvəz et (silmək üçün boş saxlayın)',
+    'Replacement text': 'Əvəzedici mətn', 'Replacement font': 'Əvəzedici şrift',
+    'Replace PDF text': 'PDF mətnini dəyişdir',
+    'The replacement is written into the PDF page content. Scanned image text cannot be replaced this way.':
+      'Əvəzedici mətn PDF səhifəsinin məzmununa yazılır. Skan edilmiş şəkil mətnini bu üsulla dəyişmək olmur.',
+    'Original PDF text replaced · editable page content': 'PDF-in orijinal mətni dəyişdirildi · redaktə olunan səhifə məzmunu',
+    'Original PDF text replaced': 'PDF-in orijinal mətni dəyişdirildi',
+    'Original PDF text replacement is available in the Tauri desktop app.':
+      'PDF-in orijinal mətnini dəyişmək Tauri masaüstü tətbiqində mümkündür.',
+    'Enter the exact text to find on the current page.': 'Cari səhifədə axtarmaq üçün dəqiq mətni daxil edin.',
+    'Use a single line for replacement text.': 'Əvəzedici mətni bir sətirdə yazın.',
+    'No matching text was found on the current page.': 'Cari səhifədə uyğun mətn tapılmadı.',
+    'More than one match was found on this page. Search for a longer, unique phrase.':
+      'Səhifədə birdən çox uyğunluq tapıldı. Daha uzun və unikal ifadə axtarın.',
+    'Replacement text is too long for the matched area; use a shorter replacement.':
+      'Əvəzedici mətn uyğun sahə üçün çox uzundur; daha qısa mətn daxil edin.',
+    'MuPDF is locating and removing the original text…': 'MuPDF orijinal mətni tapıb silir…',
+    'MuPDF returned invalid bounds for the matched text.': 'MuPDF uyğun mətn üçün yanlış sərhədlər qaytardı.',
+    'Import the selected TTF/OTF font again before replacing text.':
+      'Mətni dəyişməzdən əvvəl seçilmiş TTF/OTF şriftini yenidən idxal edin.',
+    'MuPDF will permanently remove this matching text from the in-memory PDF. You can export the edited copy; the original file is not overwritten. Continue?':
+      'MuPDF uyğun mətni yaddaşdakı PDF-dən siləcək. Redaktə edilmiş nüsxəni ixrac edə bilərsiniz; orijinal faylın üzərinə yazılmayacaq. Davam edilsin?',
     'Recent documents': 'Son sənədlər', 'LOCAL FILES': 'YERLİ FAYLLAR',
     'Clear history': 'Tarixçəni təmizlə', 'PDFs you open will appear here.': 'Açdığınız PDF-lər burada görünəcək.',
     'Remove': 'Sil', 'Remove from history': 'Tarixçədən sil',
@@ -115,6 +144,35 @@ const translations = {
   },
   ru: {
     'Workspace': 'Рабочая область', 'Document pages': 'Страницы документа',
+    'Source text uses the MuPDF replacement tool below. Objects added here remain editable annotations.':
+      'Исходный текст можно заменить инструментом MuPDF ниже. Добавленные здесь объекты остаются редактируемыми аннотациями.',
+    'Replace original PDF text': 'Заменить исходный текст PDF',
+    'MuPDF removes the matched text from the current page. Use an exact, unique phrase.':
+      'MuPDF удаляет найденный текст на текущей странице. Введите точную уникальную фразу.',
+    'Text to find on this page': 'Найти на этой странице',
+    'Exact existing PDF text': 'Точный текст из PDF',
+    'Replace with (leave blank to remove)': 'Заменить на (оставьте пустым для удаления)',
+    'Replacement text': 'Новый текст', 'Replacement font': 'Шрифт замены',
+    'Replace PDF text': 'Заменить текст PDF',
+    'The replacement is written into the PDF page content. Scanned image text cannot be replaced this way.':
+      'Новый текст записывается непосредственно в содержимое страницы PDF. Текст на сканированном изображении так заменить нельзя.',
+    'Original PDF text replaced · editable page content': 'Исходный текст PDF заменён · содержимое страницы редактируется',
+    'Original PDF text replaced': 'Исходный текст PDF заменён',
+    'Original PDF text replacement is available in the Tauri desktop app.':
+      'Замена исходного текста PDF доступна в настольном приложении Tauri.',
+    'Enter the exact text to find on the current page.': 'Введите точный текст для поиска на текущей странице.',
+    'Use a single line for replacement text.': 'Введите новый текст в одну строку.',
+    'No matching text was found on the current page.': 'На текущей странице совпадений не найдено.',
+    'More than one match was found on this page. Search for a longer, unique phrase.':
+      'На странице найдено несколько совпадений. Введите более длинную уникальную фразу.',
+    'Replacement text is too long for the matched area; use a shorter replacement.':
+      'Новый текст слишком длинный для найденной области. Используйте более короткий вариант.',
+    'MuPDF is locating and removing the original text…': 'MuPDF ищет и удаляет исходный текст…',
+    'MuPDF returned invalid bounds for the matched text.': 'MuPDF вернул неверные границы найденного текста.',
+    'Import the selected TTF/OTF font again before replacing text.':
+      'Перед заменой текста импортируйте выбранный шрифт TTF/OTF ещё раз.',
+    'MuPDF will permanently remove this matching text from the in-memory PDF. You can export the edited copy; the original file is not overwritten. Continue?':
+      'MuPDF удалит совпадающий текст из PDF в памяти. Можно экспортировать изменённую копию; исходный файл не будет перезаписан. Продолжить?',
     'Recent documents': 'Недавние документы', 'LOCAL FILES': 'ЛОКАЛЬНЫЕ ФАЙЛЫ',
     'Clear history': 'Очистить историю', 'PDFs you open will appear here.': 'Открытые PDF будут отображаться здесь.',
     'Remove': 'Удалить', 'Remove from history': 'Удалить из истории',

@@ -209,6 +209,8 @@ button:disabled { cursor: default; opacity: .4; }
 .inspector-section { padding: 14px 16px 16px; border-top: 1px solid var(--line-soft); }
 .inspector-section h3 { margin: 0 0 12px; color: var(--strong-text); font-size: 11px; font-weight: 650; }
 .editing-note { margin: -3px 0 12px; color: var(--subtle-text); font-size: 11px; line-height: 1.55; }
+.text-replacement-section > p { margin: -5px 0 12px; color: var(--subtle-text); font-size: 10px; line-height: 1.55; }
+.text-replacement-section textarea { width: 100%; min-height: 40px; margin: 5px 0 10px; padding: 8px; resize: vertical; border: 1px solid var(--control-border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 11px; line-height: 1.5; }
 .page-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 .page-action-grid .button { min-height: 31px; }
 .danger { color: var(--danger); }

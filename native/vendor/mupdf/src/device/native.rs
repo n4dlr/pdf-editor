@@ -17,11 +17,6 @@ use crate::{
 
 use super::{DefaultColorspaces, DeviceFlag, Metatext, Structure};
 
-#[cfg(target_env = "msvc")]
-#[repr(C, align(8))]
-#[allow(non_camel_case_types, dead_code)]
-struct max_align_t([u8; 8]);
-
 #[allow(unused_variables, clippy::too_many_arguments)]
 pub trait NativeDevice: 'static {
     fn close_device(&mut self) {}

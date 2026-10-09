@@ -1,8 +1,10 @@
 import './styles.css';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { degrees, PDFDocument } from 'pdf-lib';
+import { degrees, PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import * as fabric from 'fabric';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { getLocale, setLocale, t, translateDocument } from './locales.js';
 import { clearRecentPdfs, getRecentPdfs, removeRecentPdf, saveRecentPdf } from './recent-files.js';
 
@@ -53,6 +55,7 @@ const state = {
   overlays: new Map(),
   histories: new Map(),
   customFonts: [],
+  customFontBytes: new Map(),
   renderTask: null,
   renderId: 0,
   suppressHistory: false,
@@ -76,6 +79,7 @@ const state = {
 
 const HISTORY_LIMIT = 35;
 const THUMB_CACHE_LIMIT = 18;
+const nativeAvailable = isTauri();
 const clamp = (number, min, max) => Math.min(max, Math.max(min, number));
 const activePageId = () => state.pageIds[state.currentPage - 1];
 const localePageLabel = (number) => t(`Page ${number}`);
@@ -132,6 +136,7 @@ function updatePageControls() {
   for (const id of ['add-text-btn', 'add-rect-btn', 'add-image-btn', 'add-watermark-btn']) {
     $(id).disabled = !hasDocument;
   }
+  $('replace-original-text-btn').disabled = !hasDocument || !nativeAvailable;
   $('ocr-add-text-btn').disabled = !hasDocument || !dom.ocr.value.trim();
 }
 
@@ -729,6 +734,31 @@ async function updatePdf(mutator, successMessage, { removeCurrent = false } = {}
   notify(successMessage);
 }
 
+async function reloadPdfKeepingAnnotations(bytes, successMessage) {
+  saveCurrentOverlay();
+  state.renderId += 1;
+  if (state.renderTask) {
+    state.renderTask.cancel();
+    state.renderTask = null;
+  }
+  const pageId = activePageId();
+  const overlays = new Map(state.overlays);
+  const histories = new Map(state.histories);
+  const nextPdf = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+  await disposeOverlay();
+  await state.pdf.destroy();
+  state.bytes = bytes;
+  state.pdf = nextPdf;
+  state.pageIds = [...state.pageIds];
+  state.currentPage = state.pageIds.indexOf(pageId) + 1;
+  state.overlays = overlays;
+  state.histories = histories;
+  await renderPage();
+  await renderThumbnails();
+  await persistCurrentRecentPdf();
+  notify(successMessage);
+}
+
 async function deleteCurrentPage() {
   if (!state.pdf || state.pdf.numPages < 2) {
     notify('A PDF must contain at least one page.', 'error');
@@ -1228,18 +1258,145 @@ async function importFont(file) {
   if (!file) return;
   const name = file.name.replace(/\.(ttf|otf)$/i, '').replace(/[^a-zA-Z0-9 _-]/g, '').trim();
   if (!name) throw new Error('The font file needs a valid filename.');
-  const face = new FontFace(name, await file.arrayBuffer());
+  const bytes = await file.arrayBuffer();
+  const face = new FontFace(name, bytes);
   await face.load();
   document.fonts.add(face);
   if (!state.customFonts.includes(name)) state.customFonts.push(name);
+  state.customFontBytes.set(name, new Uint8Array(bytes));
   if (![...dom.objectFont.options].some((option) => option.value === name)) {
     dom.objectFont.add(new Option(name, name));
+  }
+  if (![...$('replace-font').options].some((option) => option.value === name)) {
+    $('replace-font').add(new Option(name, name));
   }
   const chip = document.createElement('span');
   chip.textContent = name;
   chip.style.fontFamily = name;
   $('font-list').append(chip);
   notify(`${name} loaded for this session`);
+}
+
+function encodeBase64(bytes) {
+  let binary = '';
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary);
+}
+
+function decodeBase64(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes;
+}
+
+function visibleRectToPdfRect(rect, crop, rotation) {
+  const corners = [
+    [rect.x0, rect.y0], [rect.x1, rect.y0],
+    [rect.x0, rect.y1], [rect.x1, rect.y1]
+  ];
+  const points = corners.map(([x, y]) => {
+    switch (rotation) {
+      case 90: return [crop.x + y, crop.y + x];
+      case 180: return [crop.x + crop.width - x, crop.y + y];
+      case 270: return [crop.x + crop.width - y, crop.y + crop.height - x];
+      default: return [crop.x + x, crop.y + crop.height - y];
+    }
+  });
+  return {
+    x0: Math.min(...points.map(([x]) => x)),
+    y0: Math.min(...points.map(([, y]) => y)),
+    x1: Math.max(...points.map(([x]) => x)),
+    y1: Math.max(...points.map(([, y]) => y))
+  };
+}
+
+async function replaceOriginalPdfText() {
+  if (!state.pdf || !state.bytes) throw new Error('Open a PDF before replacing text.');
+  if (!nativeAvailable) throw new Error('Original PDF text replacement is available in the Tauri desktop app.');
+
+  const searchText = $('replace-source-text').value.trim();
+  const replacement = $('replace-with-text').value;
+  const sourceBytes = state.bytes;
+  const sourceRecentId = state.recentId;
+  const pageIndex = state.currentPage - 1;
+  if (!searchText) throw new Error('Enter the exact text to find on the current page.');
+  if (/[\r\n]/.test(replacement)) throw new Error('Use a single line for replacement text.');
+  if (!window.confirm('MuPDF will permanently remove this matching text from the in-memory PDF. You can export the edited copy; the original file is not overwritten. Continue?')) return;
+
+  $('replace-original-text-btn').disabled = true;
+  setStatus('MuPDF is locating and removing the original text…');
+  try {
+    const result = await invoke('redact_pdf_text', {
+      pdfBase64: encodeBase64(sourceBytes),
+      pageIndex,
+      searchText
+    });
+    if (state.bytes !== sourceBytes || state.recentId !== sourceRecentId) {
+      throw new Error('The open PDF changed while MuPDF was processing it. The replacement was discarded; retry on the current document.');
+    }
+    const pdf = await PDFDocument.load(decodeBase64(result.redactedPdfBase64));
+    const page = pdf.getPage(pageIndex);
+    const crop = page.getCropBox();
+    const rotation = ((page.getRotation().angle % 360) + 360) % 360;
+    const target = visibleRectToPdfRect(result.rect, crop, rotation);
+    const visibleWidth = result.rect.x1 - result.rect.x0;
+    const visibleHeight = result.rect.y1 - result.rect.y0;
+    if (visibleWidth <= 0 || visibleHeight <= 0) {
+      throw new Error('MuPDF returned invalid bounds for the matched text.');
+    }
+
+    if (replacement.length > 0) {
+      const fontName = $('replace-font').value;
+      let font;
+      if (fontName === 'Helvetica') {
+        font = await pdf.embedFont(StandardFonts.Helvetica);
+      } else {
+        const fontBytes = state.customFontBytes.get(fontName);
+        if (!fontBytes) throw new Error('Import the selected TTF/OTF font again before replacing text.');
+        pdf.registerFontkit(fontkit);
+        font = await pdf.embedFont(fontBytes, { subset: true });
+      }
+      let fontSize = Math.min(visibleHeight * 0.82, 36);
+      const widthAtSize = font.widthOfTextAtSize(replacement, fontSize);
+      if (widthAtSize > visibleWidth) fontSize *= visibleWidth / widthAtSize;
+      if (fontSize < 4) throw new Error('Replacement text is too long for the matched area; use a shorter replacement.');
+
+      const textWidth = font.widthOfTextAtSize(replacement, fontSize);
+      const textHeight = font.heightAtSize(fontSize);
+      const centerX = (target.x0 + target.x1) / 2;
+      const centerY = (target.y0 + target.y1) / 2;
+      const radians = rotation * Math.PI / 180;
+      const localCorners = [[0, 0], [textWidth, 0], [0, textHeight], [textWidth, textHeight]];
+      const rotated = localCorners.map(([x, y]) => [
+        x * Math.cos(radians) - y * Math.sin(radians),
+        x * Math.sin(radians) + y * Math.cos(radians)
+      ]);
+      const offsetX = (Math.min(...rotated.map(([x]) => x)) + Math.max(...rotated.map(([x]) => x))) / 2;
+      const offsetY = (Math.min(...rotated.map(([, y]) => y)) + Math.max(...rotated.map(([, y]) => y))) / 2;
+      const color = $('replace-color').value.match(/[0-9a-f]{2}/gi).map((part) => parseInt(part, 16) / 255);
+      page.drawText(replacement, {
+        x: centerX - offsetX,
+        y: centerY - offsetY,
+        size: fontSize,
+        font,
+        color: rgb(...color),
+        rotate: degrees(rotation)
+      });
+    }
+
+    const bytes = new Uint8Array(await pdf.save({ useObjectStreams: true }));
+    $('replace-source-text').value = '';
+    $('replace-with-text').value = '';
+    setStatus('Original PDF text replaced · editable page content');
+    await reloadPdfKeepingAnnotations(bytes, 'Original PDF text replaced');
+  } finally {
+    updatePageControls();
+  }
 }
 
 async function undo() {
@@ -1581,6 +1738,7 @@ $('page-jump').addEventListener('change', runAction(async () => {
 $('add-image-btn').addEventListener('click', () => dom.image.click());
 $('import-font-btn').addEventListener('click', () => dom.font.click());
 $('save-btn').addEventListener('click', runAction(exportPdf));
+$('replace-original-text-btn').addEventListener('click', runAction(replaceOriginalPdfText));
 $('split-btn')?.addEventListener('click', runAction(splitCurrentPage));
 $('compress-btn').addEventListener('click', runAction(compressPdf));
 $('rotate-page-btn').addEventListener('click', runAction(rotateCurrentPage));

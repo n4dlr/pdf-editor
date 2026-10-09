@@ -30,19 +30,6 @@ if (-not (Get-Command cargo -ErrorAction SilentlyContinue) -or
     exit 0
 }
 
-$llvmCandidates = @(
-    (Join-Path $env:ProgramFiles 'LLVM\bin'),
-    (Join-Path ${env:ProgramFiles(x86)} 'LLVM\bin')
-)
-$llvmBin = $llvmCandidates | Where-Object {
-    Test-Path (Join-Path $_ 'libclang.dll')
-} | Select-Object -First 1
-if (-not $llvmBin) {
-    throw 'MuPDF requires LLVM libclang.dll. Install LLVM for Windows, then rerun this script.'
-}
-$env:LIBCLANG_PATH = $llvmBin
-$env:PATH = "$llvmBin;$env:PATH"
-
 rustup toolchain install stable
 if ($LASTEXITCODE -ne 0) { throw "rustup could not install the stable toolchain (exit code $LASTEXITCODE)." }
 rustup default stable

@@ -31,9 +31,6 @@ sudo apt-get install -y \
   libgl1-mesa-dev \
   libwayland-dev \
   libx11-dev \
-  libxcb-render0-dev \
-  libxcb-shape0-dev \
-  libxcb-xfixes0-dev \
   libxcursor-dev \
   libxi-dev \
   libxkbcommon-dev \

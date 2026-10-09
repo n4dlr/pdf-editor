@@ -147,7 +147,7 @@
 
           <section class="inspector-section object-inspector" id="object-inspector">
             <h3>Selected object</h3>
-            <p class="editing-note">Original PDF text is read-only. Text and shapes added here are editable overlays.</p>
+            <p class="editing-note">Source text uses the MuPDF replacement tool below. Objects added here remain editable annotations.</p>
             <label class="field-label" for="object-text">Content</label>
             <textarea id="object-text" rows="3" placeholder="Select a text object" disabled></textarea>
             <div class="field-row">
@@ -175,6 +175,27 @@
               <button id="layer-front-btn" class="button button-quiet" disabled>Bring forward</button>
             </div>
             <button id="delete-object-btn" class="button button-quiet danger full-width" disabled>Delete object</button>
+          </section>
+
+          <section class="inspector-section text-replacement-section">
+            <h3>Replace original PDF text</h3>
+            <p>MuPDF removes the matched text from the current page. Use an exact, unique phrase.</p>
+            <label class="field-label" for="replace-source-text">Text to find on this page</label>
+            <textarea id="replace-source-text" rows="2" placeholder="Exact existing PDF text"></textarea>
+            <label class="field-label" for="replace-with-text">Replace with (leave blank to remove)</label>
+            <textarea id="replace-with-text" rows="2" placeholder="Replacement text"></textarea>
+            <div class="field-row two-columns">
+              <div>
+                <label class="field-label" for="replace-font">Replacement font</label>
+                <select id="replace-font"><option value="Helvetica">Helvetica</option></select>
+              </div>
+              <div>
+                <label class="field-label" for="replace-color">Color</label>
+                <input id="replace-color" type="color" value="#202020" />
+              </div>
+            </div>
+            <button id="replace-original-text-btn" class="button button-accent full-width" type="button" disabled>Replace PDF text</button>
+            <p class="editing-note">The replacement is written into the PDF page content. Scanned image text cannot be replaced this way.</p>
           </section>
 
           <section class="inspector-section font-manager" id="font-manager">

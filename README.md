@@ -1,7 +1,5 @@
 # Super PDF Studio
 
-[![Native desktop builds](https://github.com/n4dlr/web-pdf/actions/workflows/native-build.yml/badge.svg)](https://github.com/n4dlr/web-pdf/actions/workflows/native-build.yml)
-
 Super PDF Studio is an offline native PDF viewer and editor for Linux and Windows. The desktop interface is written in Rust with egui/eframe and uses MuPDF for PDF rendering and editing; it does not require a browser or WebView.
 
 ## Features
@@ -16,21 +14,11 @@ Super PDF Studio is an offline native PDF viewer and editor for Linux and Window
 
 The current native release does not include OCR, custom font installation, or editing of existing embedded images/text other than the unique text replacement tool. Annotations and inserted content are committed to the PDF by MuPDF. Memory use varies with document size and page complexity; a fixed RAM footprint is not guaranteed.
 
-## Project layout
-
-- `native/` — the native Rust/egui application and MuPDF integration.
-- `native/vendor/mupdf/` — the upstream MuPDF Rust wrapper with a small MSVC bindgen compatibility fix.
-- `setup-linux.sh`, `start-linux.sh`, `build-linux.sh` — Debian/Ubuntu setup, launch, and package scripts.
-- `setup-windows.ps1`, `start-windows.ps1`, `build-win.ps1` — Windows setup, launch, and executable build scripts.
-- `.github/workflows/native-build.yml` — CI jobs for Linux and Windows release artifacts.
-
-The native desktop app is the supported application entry point. The older browser/Tauri source tree remains in the repository but is not used by the native build or the scripts documented here.
-
 ## Requirements
 
 - Rust stable and Cargo.
 - Linux: Debian/Ubuntu development libraries for egui, FreeType, fontconfig, X11/Wayland, and MuPDF's bundled native build (see setup script).
-- Windows: Visual Studio 2022 Build Tools with the **Desktop development with C++** workload and Windows SDK, Rust's MSVC toolchain, and LLVM with `libclang.dll` for MuPDF's Rust bindings.
+- Windows: Visual Studio 2022 Build Tools with the **Desktop development with C++** workload and Windows SDK, plus Rust's MSVC toolchain.
 
 ## Linux
 
@@ -77,12 +65,6 @@ Build the standalone release executable:
 
 The executable is copied to `artifacts\SuperPDFStudio.exe`. Windows builds must be compiled on Windows using the MSVC toolchain; the Linux script does not cross-compile it.
 
-## GitHub release builds
-
-Every push to `main`, pull request, or manually dispatched workflow runs the native build on GitHub Actions. The workflow builds the Linux Debian package and Windows x86_64 executable independently and uploads them as run artifacts for 30 days.
-
-To download a build, open the [Native desktop builds workflow](https://github.com/n4dlr/web-pdf/actions/workflows/native-build.yml), select a successful run, and download `SuperPDFStudio-Linux-x86_64` or `SuperPDFStudio-Windows-x86_64` from its **Artifacts** section. These are CI artifacts, not signed installers or permanent GitHub Releases.
-
 Both launch scripts accept an optional PDF path, for example `./start-linux.sh ./document.pdf` or `.\start-windows.ps1 .\document.pdf`.
 
 ## Local preferences and recent documents
@@ -91,4 +73,4 @@ The application stores its language selection and up to 16 recent PDF file paths
 
 ## Licensing
 
-This application links MuPDF, which is licensed under AGPL-3.0. The vendored Rust wrapper is based on upstream `mupdf` 0.8.0; its only local source patch supplies the 8-byte MSVC `max_align_t` alignment type when bindgen omits it. See [LICENSE](./LICENSE) and ensure your distribution complies with the licenses of all bundled dependencies. In particular, distributions of the MuPDF-linked application must comply with the applicable AGPL source and notice requirements.
+This application links MuPDF, which is licensed under AGPL-3.0. See [LICENSE](./LICENSE) and ensure your distribution complies with the licenses of all bundled dependencies.
