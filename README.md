@@ -40,6 +40,10 @@ The installer bundles the application and offline WebView2 runtime. It does not 
 
 The app UI supports Azerbaijani, Russian, and English, remembers the selected language on this device, and initially follows the operating-system language where possible. The stock Tauri NSIS bundle offers its language selector in English and Russian; Azerbaijani is available inside the app but is not a built-in NSIS installer language.
 
+## Local document history
+
+The app keeps copies of up to 12 recently opened PDFs in this browser profile using IndexedDB, so they can be reopened after restarting the app or refreshing the page. Use the clock button to open history, remove one entry, or clear all saved copies. This storage stays on the device; browser storage can still be removed by clearing site data.
+
 ## Notes and limits
 
 - OCR currently supports the bundled English model and runs on the current page.
